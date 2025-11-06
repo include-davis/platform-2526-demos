@@ -1,8 +1,9 @@
 import { MongoClient, ObjectId } from "mongodb";
 
 /**
- * 
- * @returns An array containing all records in the database.
+ * Get all cats from the database.
+ * @param client: The MongoClient object.
+ * @returns An array containing all cats in the database.
  */
 export async function getAllCats(client: MongoClient) {
   const cats = client.db("cats").collection("cats").find();
@@ -10,9 +11,10 @@ export async function getAllCats(client: MongoClient) {
 }
 
 /**
- * 
- * @param id Record ID of the record to get
- * @returns An object representing the record.
+ * Get a cat from the database.
+ * @param client: The MongoClient object.
+ * @param id ID of the cat to get.
+ * @returns An object representing the cat.
  */
 export async function getCat(client: MongoClient, id) {
     const cat = await client.db("cats").collection("cats").findOne({ _id: new ObjectId(id)});
@@ -20,11 +22,11 @@ export async function getCat(client: MongoClient, id) {
 }
 
 /**
- * 
- * @param client:
- * @param name:
- * @param fur:
- * @returns The newly created cat id
+ * Create a new cat in the database.
+ * @param client: The MongoClient object.
+ * @param name: The name of the new cat.
+ * @param fur: The fur of the new cat.
+ * @returns The newly created cat's id.
  */
 export async function createCat(client: MongoClient, name: string, fur: string) {
     const myDB = client.db("cats");
@@ -38,9 +40,11 @@ export async function createCat(client: MongoClient, name: string, fur: string) 
 }
 
 /**
- * Update a cat
- * @param id Integer representing the ID of the record to update
- * @param start_time Date object representing the new time to set the start time to
+ * Update a cat in the database.
+ * @param client: The MongoClient object.
+ * @param id Represents the ID of the cat to update.
+ * @param name New name of the cat to update.
+ * @param fur New fur of the cat to update.
  */
 export async function updateCat(client: MongoClient, id: string, name: string, fur: string) {
     const myDB = client.db("cats");
@@ -56,8 +60,9 @@ export async function updateCat(client: MongoClient, id: string, name: string, f
 }
 
 /**
- * Delete a single record from the database.
- * @param id Integer representing the ID of the record to delete
+ * Delete a single cat from the database.
+ * @param client: The MongoClient object.
+ * @param id Represents the ID of the cat to update.
  */
 export async function deleteCat(client: MongoClient, id: string) {
     const myDB = client.db("cats");
