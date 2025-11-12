@@ -1,0 +1,15 @@
+.catDisplay {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    align-items: flex-start;
+    padding: 40px;
+}
+
+.catCard {
+    padding: 16px;
+    border: 1px solid black;
+
+    display: flex;
+    gap: 20px;
+}
