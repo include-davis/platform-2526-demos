@@ -93,7 +93,7 @@ app.post("/register", (req: Request, res: Response) => createUserController(req,
 
 /* POST login. */
 app.post('/log-in', (req: Request, res: Response) => {
-    passport.authenticate("local", {session: false}, (err, user, info) => {
+    passport.authenticate("local", {session: false}, (err: Error, user: any) => {
         if (err || !user) {
             return res.status(400).json({
                 message: 'Something is not right',
