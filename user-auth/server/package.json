@@ -5,15 +5,19 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
+    "jsonwebtoken": "^9.0.2",
     "mongodb": "^7.0.0",
     "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@types/express": "^5.0.5",
     "@types/express-session": "^1.18.2",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/passport": "^1.0.17",
+    "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38"
   }
 }

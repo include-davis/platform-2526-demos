@@ -4,8 +4,9 @@ import { startMongoClient } from "./services/mongoService.ts";
 import 'dotenv/config'
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as JWTStrategy, ExtractJwt } from "passport-jwt";
 import bcrypt from "bcryptjs";
-import session from "express-session";
+import jwt from 'jsonwebtoken'
 import { getUserById, getUserByUsername } from "./services/usersService.ts";
 import usersRouter from "./routes/usersRouter.ts";
 import helloRouter from "./routes/helloRouter.ts";
@@ -22,19 +23,10 @@ async function setupClient() {
 
 setupClient();
 
-// Session setup
-app.use(
-    session({
-        secret: process.env.SESSION_SECRET ?? (() => { throw new Error("session secret is required"); })(),
-        resave: false,
-        saveUninitialized: false,
-    })
-);
-
 // Passport setup
 app.use(passport.initialize());
-app.use(passport.session());
 
+// Local strategy for logins
 passport.use(
     new LocalStrategy(async (username: string, password: string, done: Function) => {
         try {
@@ -54,6 +46,25 @@ passport.use(
         }
     })
 );
+
+// JWT strategy for protected routes
+passport.use(
+    new JWTStrategy({
+        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+        secretOrKey   : 'your_jwt_secret'
+    },
+    async function (jwtPayload, done) {
+        try {
+            const user = await getUserById(app.locals.client, jwtPayload.sub);
+            if (!user) {
+                return done(null, false);
+            }
+            return done(null, user);
+        } catch (err) {
+            return done(err);
+        }
+    }
+));
 
 passport.serializeUser((user: any, done: Function) => {
     done(null, user._id);
@@ -78,16 +89,27 @@ function ensureAuthenticated(req: Request, res: Response, next: Function) {
     });
 }
 
-app.use("/users", usersRouter); // This is an unprotected route
-app.use('/hello', ensureAuthenticated, helloRouter); // This is a protected route
-
 app.post("/register", (req: Request, res: Response) => createUserController(req, res));
 
-app.post("/log-in", passport.authenticate("local"), (req: Request, res: Response) => {
-    res.json({
-        message: "login successful",
-        user: req.user,
-    });
+/* POST login. */
+app.post('/log-in', (req: Request, res: Response) => {
+    passport.authenticate("local", {session: false}, (err, user, info) => {
+        if (err || !user) {
+            return res.status(400).json({
+                message: 'Something is not right',
+                user   : user
+            });
+        }
+
+       req.login(user, {session: false}, (err) => {
+           if (err) {
+               res.send(err);
+           }
+           // generate a signed son web token with the contents of user object and return it in the response
+           const token = jwt.sign({ sub: user._id.toString() }, 'your_jwt_secret');
+           return res.json({user, token});
+        });
+    })(req, res);
 });
 
 app.post("/log-out", (req: Request, res: Response) => {
@@ -103,18 +125,16 @@ app.post("/log-out", (req: Request, res: Response) => {
     });
 });
 
-app.get("/auth-status", (req: Request, res: Response) => {
-    if (req.isAuthenticated()) {
+app.get(
+    "/auth-status", passport.authenticate("jwt", { session: false }), (req: Request, res: Response) => {
         res.json({
             isAuthenticated: true,
             user: req.user,
         });
-    } else {
-        res.json({
-            isAuthenticated: false,
-        });
     }
-});
+);
+app.use("/users", passport.authenticate('jwt', {session: false}), usersRouter);
+app.use('/hello', passport.authenticate('jwt', {session: false}), helloRouter);
 
 
 const PORT = 3000;
