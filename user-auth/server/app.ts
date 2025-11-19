@@ -28,7 +28,7 @@ setupClient();
 // Passport setup
 app.use(passport.initialize());
 
-// Local strategy for logins
+// Local strategy for username + password login
 passport.use(
     new LocalStrategy(async (username: string, password: string, done: Function) => {
         try {
@@ -68,22 +68,10 @@ passport.use(
     }
 ));
 
-passport.serializeUser((user: any, done: Function) => {
-    done(null, user._id);
-});
-
-passport.deserializeUser(async (id: string, done: Function) => {
-    try {
-        const user = await getUserById(app.locals.client, id);
-        done(null, user);
-    } catch (err) {
-        done(err);
-    }
-});
-
+// Register (creates user)
 app.post("/register", (req: Request, res: Response) => createUserController(req, res));
 
-/* POST login. */
+// Log in
 app.post('/log-in', (req: Request, res: Response) => {
     passport.authenticate("local", {session: false}, (err: Error, user: any) => {
         if (err || !user) {
@@ -108,31 +96,11 @@ app.post('/log-in', (req: Request, res: Response) => {
     })(req, res);
 });
 
-app.post("/log-out", (req: Request, res: Response) => {
-    req.logout((err) => {
-        if (err) {
-            return res.status(500).json({
-                message: "logout failed"
-            });
-        }
-        res.json({
-            message: "logout successful"
-        });
-    });
-});
-
-app.get(
-    "/auth-status", passport.authenticate("jwt", { session: false }), (req: Request, res: Response) => {
-        res.json({
-            isAuthenticated: true,
-            user: req.user,
-        });
-    }
-);
+// Protected routes
 app.use("/users", passport.authenticate('jwt', {session: false}), usersRouter);
 app.use('/hello', passport.authenticate('jwt', {session: false}), helloRouter);
 
-
+// Start server
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`listening on port ${PORT}`);

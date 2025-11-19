@@ -5,6 +5,8 @@ import Cookies from "js-cookie";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+// This is a React component that uses data from a protected endpoint
+// We only want this visible if the browser has an auth token
 function SecretInfo() {
     const [helloText, setHelloText] = useState("");
 
@@ -22,6 +24,10 @@ function SecretInfo() {
 
 export default function Secret() {
     const token = Cookies.get("auth_token");
+
+    // Block access if we don't have auth token
+    // If we didn't have this block, the API call will still fail if we don't have auth token
+    // due to no authorization.
     if (!token) {
         return (
             <div>
@@ -29,10 +35,12 @@ export default function Secret() {
             </div>
         );
     }
+
+    // Show secret component if we have auth token
     return (
-    <div>
-        <p>secret text:</p>
-        <SecretInfo/>
-    </div>
+        <div>
+            <p>secret text:</p>
+            <SecretInfo/>
+        </div>
     );
 }

@@ -1,5 +1,7 @@
 import Cookies from "js-cookie";
 
+// Try to log in and store auth token as cookie
+// TODO: Add error handling
 export default async function logIn(username: string, password: string) {
     const loginUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}/log-in`;
     console.log("sending request to ", loginUrl);
