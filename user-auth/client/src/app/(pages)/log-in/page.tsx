@@ -3,6 +3,7 @@ import { useState } from "react";
 import styles from "./page.module.scss";
 import logIn from "@/app/(util)/logIn";
 import Link from "next/link";
+import Cookies from "js-cookie";
 
 export default function LogIn() {
   const [usernameInput, setUsernameInput] = useState<string>("");
@@ -27,7 +28,7 @@ export default function LogIn() {
       </div>
       <button onClick={() => logIn(usernameInput, passwordInput)}>Log In</button>
       <button onClick={() => {
-        console.log(localStorage.getItem("auth_token"));
+        console.log(Cookies.get("auth_token"));
       }}>Check token</button>
       <Link href="/secret">go to secret page</Link>
     </div>

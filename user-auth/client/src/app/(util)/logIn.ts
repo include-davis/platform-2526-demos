@@ -1,3 +1,5 @@
+import Cookies from "js-cookie";
+
 export default async function logIn(username: string, password: string) {
     const loginUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}/log-in`;
     console.log("sending request to ", loginUrl);
@@ -16,6 +18,6 @@ export default async function logIn(username: string, password: string) {
 
         const result = await response.json();
         console.log("result", result);
-        localStorage.setItem('auth_token', result.token);
+        Cookies.set("auth_token", result.token, { expires: 7, path: "/" }); // expires in 7 days
         return result;
 }
