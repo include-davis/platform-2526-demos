@@ -7,6 +7,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as JWTStrategy, ExtractJwt } from "passport-jwt";
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken'
+import cors from 'cors';
 import { getUserById, getUserByUsername } from "./services/usersService.ts";
 import usersRouter from "./routes/usersRouter.ts";
 import helloRouter from "./routes/helloRouter.ts";
@@ -15,6 +16,7 @@ import { createUserController } from "./controllers/usersController.ts";
 // Express + Mongo setup
 const app: Application = express();
 app.use(express.json());
+app.use(cors());
 
 async function setupClient() {
     const client = await startMongoClient();
@@ -79,16 +81,6 @@ passport.deserializeUser(async (id: string, done: Function) => {
     }
 });
 
-function ensureAuthenticated(req: Request, res: Response, next: Function) {
-    if (req.isAuthenticated && req.isAuthenticated()) {
-        return next();
-    }
-
-    return res.status(401).json({
-        message: "Not authenticated",
-    });
-}
-
 app.post("/register", (req: Request, res: Response) => createUserController(req, res));
 
 /* POST login. */
@@ -101,13 +93,17 @@ app.post('/log-in', (req: Request, res: Response) => {
             });
         }
 
-       req.login(user, {session: false}, (err) => {
-           if (err) {
-               res.send(err);
-           }
-           // generate a signed son web token with the contents of user object and return it in the response
-           const token = jwt.sign({ sub: user._id.toString() }, 'your_jwt_secret');
-           return res.json({user, token});
+        req.login(user, {session: false}, (err) => {
+            if (err) {
+                res.send(err);
+            }
+            // generate a signed son web token with the contents of user object and return it in the response
+            const token = jwt.sign({ sub: user._id.toString() }, 'your_jwt_secret');
+            const return_user = {
+                username: user.username,
+                user_id: user._id,
+            }
+            return res.json({user: return_user, token});
         });
     })(req, res);
 });
