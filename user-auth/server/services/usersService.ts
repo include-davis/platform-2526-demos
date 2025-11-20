@@ -6,8 +6,8 @@ import bcrypt from "bcryptjs";
  * @returns An array containing all users in the database.
  */
 export async function getAllUsers(client: MongoClient) {
-    const cats = client.db("cats").collection("users").find();
-    return cats.toArray();
+    const users = client.db("cats").collection("users").find();
+    return users.toArray();
 }
 
 /**
